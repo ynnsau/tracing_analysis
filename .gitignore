@@ -1,0 +1,14 @@
+/build*/
+/out/
+/traces/
+# Raw traces and compressed trace caches must stay local.
+*.bin
+*.bin.*
+*.cart
+*.cart.*
+*.rtrace
+*.rtrace.*
+__pycache__/
+*.pyc
+slurm-*.out
+slurm-*.err

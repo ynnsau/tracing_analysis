@@ -1,0 +1,143 @@
+{
+  "status": "partial",
+  "counts": {
+    "analyzed": 10,
+    "duplicate_alias": 1,
+    "invalid_input": 3,
+    "failed_task": 0
+  },
+  "inputs": [
+    {
+      "trace_id": "r0_bc_81b06a15ad",
+      "path": "/research/yans3/gitdoc/remap_tracing/bc.bin",
+      "label": "Original / BC",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r0_bc_81b06a15ad",
+      "sha256": "31088e0066d53ece7978d85168b1e40e09238a2e31ce2578b27a1810bd7d86de"
+    },
+    {
+      "trace_id": "r0_bfs_f5c070eb98",
+      "path": "/research/yans3/gitdoc/remap_tracing/bfs.bin",
+      "label": "Original / BFS",
+      "manifest_status": "reused_result",
+      "status": "analyzed",
+      "reused": true,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_v1/results/r0_bfs_f5c070eb98",
+      "sha256": "ea916562e67868be26191cd2c35cbee900a196794bc607337a1018a33faf2785"
+    },
+    {
+      "trace_id": "r0_cc_3cd2baf7ac",
+      "path": "/research/yans3/gitdoc/remap_tracing/cc.bin",
+      "label": "Original / CC",
+      "manifest_status": "reused_result",
+      "status": "analyzed",
+      "reused": true,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_v1/results/r0_cc_3cd2baf7ac",
+      "sha256": "3e235df56e6725afb1d980f4cc7f2a9267a381962f7d884508806d5fc9649208"
+    },
+    {
+      "trace_id": "r0_pr_b8e5f78041",
+      "path": "/research/yans3/gitdoc/remap_tracing/pr.bin",
+      "label": "Original / PR",
+      "manifest_status": "reused_result",
+      "status": "analyzed",
+      "reused": true,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_v1/results/r0_pr_b8e5f78041",
+      "sha256": "ca85419305b17ab19a4b19b5e905b395052fc0bdfd6ed2ffb8d33564198596a8"
+    },
+    {
+      "trace_id": "r0_xs_20t_1fed27b3cc",
+      "path": "/research/yans3/gitdoc/remap_tracing/xs_20t.bin",
+      "label": "Original / XS 20t",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r0_xs_20t_1fed27b3cc",
+      "sha256": "3bec11d79b25fdc76e9342e5dea70dd530f6a7a3eb0f98f55dad01676216ac81"
+    },
+    {
+      "trace_id": "r0_xs_20t_300000p_3868b65f34",
+      "path": "/research/yans3/gitdoc/remap_tracing/xs_20t_300000p.bin",
+      "label": "Original / XS 20t / 300000p",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r0_xs_20t_300000p_3868b65f34",
+      "sha256": "ad9ca45526435dc983d5cf0725d4190de63919bf8425f572255b7f577045d8e7"
+    },
+    {
+      "trace_id": "r1_bc_420f70ad20",
+      "path": "/research/yans3/trace/bc.bin",
+      "label": "Original / BC",
+      "manifest_status": "duplicate_alias",
+      "status": "duplicate_alias",
+      "reason": "Duplicate of r0_bc_81b06a15ad"
+    },
+    {
+      "trace_id": "r1_trace_09_07_bc_8g_noTHP_5f7ed7edbf",
+      "path": "/research/yans3/trace/trace_09_07/bc_8g_noTHP.bin",
+      "label": "09-07 / bc 8G / no THP",
+      "manifest_status": "invalid_input",
+      "status": "invalid_input",
+      "reason": "header implies 42949672992 bytes; actual 15393095680"
+    },
+    {
+      "trace_id": "r1_trace_09_07_bc_8g_withTHP_1a0ede8f94",
+      "path": "/research/yans3/trace/trace_09_07/bc_8g_withTHP.bin",
+      "label": "09-07 / bc 8G / THP",
+      "manifest_status": "invalid_input",
+      "status": "invalid_input",
+      "reason": "header implies 42949673056 bytes; actual 15103688704"
+    },
+    {
+      "trace_id": "r1_trace_09_07_bfs_8g_noTHP_1d3fc83cc2",
+      "path": "/research/yans3/trace/trace_09_07/bfs_8g_noTHP.bin",
+      "label": "09-07 / BFS 8G / no THP",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r1_trace_09_07_bfs_8g_noTHP_1d3fc83cc2",
+      "sha256": "c8e1c01e45f1046b41ae409492bca07b04ecc7c44ca382f68dbca258d2d6e775"
+    },
+    {
+      "trace_id": "r1_trace_09_07_bfs_8g_withTHP_467813de1b",
+      "path": "/research/yans3/trace/trace_09_07/bfs_8g_withTHP.bin",
+      "label": "09-07 / BFS 8G / THP",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r1_trace_09_07_bfs_8g_withTHP_467813de1b",
+      "sha256": "3f50ac856eb905974314684809985fd35367a51b3bcbe82360b27973fd4d7346"
+    },
+    {
+      "trace_id": "r1_trace_09_07_cc_8g_noTHP_25fca2b541",
+      "path": "/research/yans3/trace/trace_09_07/cc_8g_noTHP.bin",
+      "label": "09-07 / CC 8G / no THP",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r1_trace_09_07_cc_8g_noTHP_25fca2b541",
+      "sha256": "7526e03c15905d1662516b6a7be1cd3e5ec8a16f5231cf1eef07f5ea97d965f0"
+    },
+    {
+      "trace_id": "r1_trace_09_07_cc_8g_withTHP_484755becf",
+      "path": "/research/yans3/trace/trace_09_07/cc_8g_withTHP.bin",
+      "label": "09-07 / CC 8G / THP",
+      "manifest_status": "eligible",
+      "status": "analyzed",
+      "reused": false,
+      "result": "/research/yans3/gitdoc/tracing_analysis/out/write_read_all_20260927_retry1/results/r1_trace_09_07_cc_8g_withTHP_484755becf",
+      "sha256": "0011246164cdab5a0b4e42af9b4b8c0edf6d66e9ff0d782fa1dcf60827a8ba2e"
+    },
+    {
+      "trace_id": "r1_trace_09_07_pr_8g_withTHP_1a6cd094d2",
+      "path": "/research/yans3/trace/trace_09_07/pr_8g_withTHP.bin",
+      "label": "09-07 / pr 8G / THP",
+      "manifest_status": "invalid_input",
+      "status": "invalid_input",
+      "reason": "header implies 42949672992 bytes; actual 15036579840"
+    }
+  ]
+}

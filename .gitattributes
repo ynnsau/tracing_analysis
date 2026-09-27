@@ -1,0 +1,2 @@
+# Keep CSV text portable and avoid committing CRLF as trailing whitespace.
+*.csv text eol=lf
