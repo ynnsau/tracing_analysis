@@ -22,15 +22,57 @@ of the same 64-byte line** rule:
 
 Most unmatched writes are therefore pending at the boundary, not superseded.
 Neither category proves that the written bytes are useless: pending writes may
-be read after capture ends, and a superseding write may modify different bytes
-within the same line. These statistics describe observed line-level access
-relationships, not byte-level data dependencies or cache hit rates.
+be read after capture ends, and CPU reads served by retained cache copies are
+invisible at the memory tracing interface. These statistics describe observed
+line-level access relationships, not byte-level data dependencies or cache hit
+rates. In particular, a full-line dirty writeback must not be interpreted as an
+individual CPU store that updates only some bytes of the line.
 
 The first-read matches account for **7.95% of recorded reads**, a different
 denominator from the 68.06% write match rate. Reads without a pending write can
 still be repeated reads of data that was written and already matched earlier,
 or reads of data written before the trace began. They are not necessarily
 independent of writes.
+
+### Interpreting write → write observations below the CPU caches
+
+“Superseded before read” means another write to the same 64-byte line was
+**observed at the tracing interface** before another read. It does not establish
+that the CPU never read or used the earlier data, or that each observed write
+was a capacity eviction that invalidated every CPU-cached copy.
+
+Possible mechanisms for a legitimate `W(A) → W(A)` observation include:
+
+- **Full-line overwrite without fetching the old contents.** On processors
+  supporting ownership-only transactions such as ItoM, the CPU can acquire
+  ownership for a complete overwrite and later evict the new dirty line without
+  reading the previous contents. Whether this occurs depends on the processor
+  and store sequence; a full-line overwrite does not always avoid a read.
+- **Writeback without invalidation.** CLWB can write back a dirty line while
+  retaining a clean cached copy. A subsequent store can dirty that resident line
+  again, followed by another writeback. CPU reads hitting the retained copy would
+  also be invisible to this trace.
+- **Streaming/non-temporal writes.** These can write memory without first loading
+  the destination. Such writes are not ordinary dirty-cache evictions.
+
+These transaction distinctions are documented in the
+[Intel uncore reference, opcode table](https://cdrdv2-public.intel.com/679093/639778%20ICX%20UPG%20v1.pdf).
+They are **candidate explanations, not mechanisms established for these traces**.
+
+By contrast, after a line is removed from all CPU caches, an ordinary partial
+store generally needs a read-for-ownership (RFO) to retrieve the old contents.
+There need not be a demand-load instruction, but if the RFO requires data from
+the traced memory and is captured, the interface sequence is `W → R → W`, not
+`W → W`. Intel explicitly identifies RFOs as store-initiated requests in its
+[performance-event documentation](https://perfmon-events.intel.com/platforms/icelakex/core-events/core/).
+
+The current records retain address, read/write direction, and timestamp, not the
+originating CPU instruction or coherence opcode. Before attributing supersession
+to a CPU mechanism, verify read coverage (including store-triggered reads),
+collector drops, read/write ordering, and that each accepted transaction is
+recorded exactly once. No collector audit or CPU-mechanism attribution was
+performed for this publication. This qualification changes the interpretation,
+not the matching rule or reported counts.
 
 ## 2. The matched distances are long and broadly distributed
 
