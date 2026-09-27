@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -160,6 +161,7 @@ struct Options {
   std::string input,output;
   unsigned workers=16,decoders=4,prefetch=8,queue_batches=4;
   U64 block_records=262144;
+  U64 timeline_bin_cycles=0; // Optional; 40,000,000 cycles = 0.1 s at 400 MHz.
   double progress_seconds=5;
   std::optional<U64> max_records;
   unsigned test_delay_first_block_ms=0;
@@ -175,6 +177,7 @@ Options options(int argc,char** argv) {
     if (k=="--help") {
       std::cout << "write_read_analyzer --input CART.bin --output NEW_DIR [--workers 16] [--decode-workers 4]\n"
                 << "  [--block-records 262144] [--prefetch 8] [--queue-batches 4] [--progress-seconds 5]\n"
+                << "  [--timeline-bin-cycles 40000000]  # 0 disables execution timeline\n"
                 << "  [--max-records N]  # smoke only: never emits COMPLETE\n";
       std::exit(0);
     }
@@ -182,6 +185,7 @@ Options options(int argc,char** argv) {
     if (k=="--input") o.input=v;
     else if (k=="--output") o.output=v;
     else if (k=="--block-records") o.block_records=number(v);
+    else if (k=="--timeline-bin-cycles") o.timeline_bin_cycles=number(v);
     else if (k=="--max-records") o.max_records=number(v);
     else if (k=="--progress-seconds") {
       std::size_t pos; o.progress_seconds=std::stod(v,&pos);
@@ -248,37 +252,61 @@ bool same_file(const struct stat& a,const struct stat& b) {
     &&a.st_ctim.tv_sec==b.st_ctim.tv_sec&&a.st_ctim.tv_nsec==b.st_ctim.tv_nsec;
 }
 struct Event { U64 line_write,timestamp,index; };
-struct Batch { std::vector<Event> events; U64 base=0; };
+struct Batch { std::vector<Event> events; U64 base=0,origin=0; };
 struct Block {
   std::vector<unsigned char> raw;
   std::vector<Batch> shards;
   U64 count=0,valid=0,first_time=0,last_time=0;
 };
 struct Pending { U64 timestamp,index; };
+struct TimelineCounts {
+  U64 reads=0,writes=0,matched=0;
+  void merge(const TimelineCounts& b) {
+    reads=add(reads,b.reads); writes=add(writes,b.writes); matched=add(matched,b.matched);
+  }
+};
+using Timeline = std::map<U64,TimelineCounts>;
 struct Worker {
   Queue<Batch> queue;
   std::array<Stats,2> stats;
+  std::array<Timeline,2> timeline;
+  U64 timeline_bin_cycles;
   std::atomic<U64> processed{0},current_pending{0},max_pending{0};
-  Worker(unsigned cap,std::atomic<bool>& cancel):queue(cap,cancel){}
+  Worker(unsigned cap,std::atomic<bool>& cancel,U64 bin_cycles):queue(cap,cancel),timeline_bin_cycles(bin_cycles){}
   void run() {
     std::unordered_map<U64,Pending,Hash> pending;
     Batch batch;
+    std::array<U64,2> cached_bin{};
+    std::array<TimelineCounts*,2> cached_counts{};
     while (queue.pop(batch)) {
       U64 peak=max_pending;
       for (const auto& e:batch.events) {
         const U64 key=e.line_write&~WRITE, index=batch.base+e.index;
         auto& s=stats[key&1];
+        TimelineCounts* tc=nullptr;
+        if (timeline_bin_cycles) {
+          require(e.timestamp>=batch.origin,"timeline event precedes origin");
+          const U64 bin=(e.timestamp-batch.origin)/timeline_bin_cycles;
+          const auto channel=key&1;
+          if (!cached_counts[channel] || cached_bin[channel]!=bin) {
+            cached_counts[channel]=&timeline[channel][bin]; cached_bin[channel]=bin;
+          }
+          tc=cached_counts[channel];
+        }
         if (e.line_write&WRITE) {
           ++s.writes;
+          if (tc) ++tc->writes;
           auto [it,inserted]=pending.try_emplace(key,Pending{e.timestamp,index});
           if (!inserted) { ++s.superseded; it->second={e.timestamp,index}; }
           peak=std::max<U64>(peak,pending.size());
         } else {
           ++s.reads; auto it=pending.find(key);
+          if (tc) ++tc->reads;
           if (it==pending.end()) ++s.unpaired_reads;
           else {
             require(e.timestamp>=it->second.timestamp && index>it->second.index,"pair order violated");
             ++s.matched; s.time.sample(e.timestamp-it->second.timestamp);
+            if (tc) ++tc->matched;
             s.operations.sample(index-it->second.index-1); pending.erase(it);
           }
         }
@@ -297,6 +325,21 @@ void atomic_write(const fs::path& path,const std::string& data) {
   std::ofstream out(tmp,std::ios::binary); out << data; out.flush();
   require(bool(out),"cannot write "+path.string()); out.close();
   require(bool(out),"cannot close "+path.string()); fs::rename(tmp,path);
+}
+std::string timeline_csv(const std::array<Timeline,3>& timelines,U64 width) {
+  std::ostringstream o;
+  o << "group,bin,start_offset_cycles,end_offset_cycles_exclusive,reads,writes,matched_pairs\n";
+  const std::array<std::string,3> names={"combined","channel_0","channel_1"};
+  for (const auto& [bin,counts]:timelines[0]) {
+    (void)counts;
+    for (unsigned g=0;g<3;++g) {
+      const auto it=timelines[g].find(bin);
+      const auto c=it==timelines[g].end()?TimelineCounts{}:it->second;
+      o << names[g] << ',' << bin << ',' << decimal(U128(bin)*width) << ','
+        << decimal((U128(bin)+1)*width) << ',' << c.reads << ',' << c.writes << ',' << c.matched << '\n';
+    }
+  }
+  return o.str();
 }
 std::string hist_csv(const std::array<Stats,3>& groups,bool time) {
   std::ostringstream o; o << std::setprecision(18);
@@ -347,7 +390,7 @@ void analyze(const Options& o) {
   auto fail=[&](){ std::lock_guard lock(error_mutex); if (!error) error=std::current_exception(); cancel=true; };
   Queue<std::packaged_task<Block()>> jobs(o.prefetch,cancel);
   std::vector<std::unique_ptr<Worker>> workers;
-  for (unsigned i=0;i<o.workers;++i) workers.push_back(std::make_unique<Worker>(o.queue_batches,cancel));
+  for (unsigned i=0;i<o.workers;++i) workers.push_back(std::make_unique<Worker>(o.queue_batches,cancel,o.timeline_bin_cycles));
   std::vector<std::thread> threads;
   std::jthread progress;
   std::atomic<U64> decoded_raw{0},dispatched_raw{0},dispatched_valid{0};
@@ -368,7 +411,7 @@ void analyze(const Options& o) {
       << " pending=" << pending << " sum_worker_pending_high_water=" << peak << " sum_queue_high_water_batches=" << queue_peak
       << " rss_high_water_MiB=" << static_cast<double>(usage.ru_maxrss)/1024.0 << '\n';
   };
-  U64 total_valid=0,total_invalid=0,last_time=0; bool have_time=false;
+  U64 total_valid=0,total_invalid=0,first_time=0,last_time=0; bool have_time=false;
   try {
     for (auto& w:workers) threads.emplace_back([&,p=w.get()](){
       try {p->run();} catch (const Cancelled&) {} catch (...) {fail();}
@@ -415,11 +458,13 @@ void analyze(const Options& o) {
       if (cancel) throw Cancelled();
       if (b.valid) {
         require(!have_time||b.first_time>=last_time,"CART timestamps decrease across blocks");
+        if (!have_time) first_time=b.first_time;
         have_time=true; last_time=b.last_time;
       }
       require(EVP_DigestUpdate(digest.get(),b.raw.data(),b.raw.size())==1,"SHA256 update failed");
       for (unsigned w=0;w<o.workers;++w) if (!b.shards[w].events.empty()) {
-        b.shards[w].base=total_valid; workers[w]->queue.push(std::move(b.shards[w]));
+        b.shards[w].base=total_valid; b.shards[w].origin=first_time;
+        workers[w]->queue.push(std::move(b.shards[w]));
       }
       total_valid=add(total_valid,b.valid); total_invalid=add(total_invalid,b.count-b.valid);
       dispatched_valid=total_valid; dispatched_raw.fetch_add(b.count);
@@ -438,13 +483,29 @@ void analyze(const Options& o) {
     std::rethrow_exception(original);
   }
   std::array<Stats,3> groups;
+  std::array<Timeline,3> timelines;
   U64 processed=0,peak=0,queue_peak=0;
   for (auto& w:workers) {
     groups[1].merge(w->stats[0]); groups[2].merge(w->stats[1]);
+    for (unsigned channel=0;channel<2;++channel)
+      for (const auto& [bin,c]:w->timeline[channel]) timelines[channel+1][bin].merge(c);
     processed=add(processed,w->processed); peak=add(peak,w->max_pending); queue_peak=add(queue_peak,w->queue.high_water);
   }
   groups[0].merge(groups[1]); groups[0].merge(groups[2]);
   for (const auto& g:groups) g.verify();
+  if (o.timeline_bin_cycles) {
+    for (unsigned g=1;g<3;++g)
+      for (const auto& [bin,c]:timelines[g]) timelines[0][bin].merge(c);
+    for (unsigned g=0;g<3;++g) {
+      TimelineCounts total;
+      for (const auto& [bin,c]:timelines[g]) {
+        require(have_time && bin<=(last_time-first_time)/o.timeline_bin_cycles,"timeline bin out of range");
+        require(c.matched<=c.reads,"timeline matches exceed reads"); total.merge(c);
+      }
+      require(total.reads==groups[g].reads && total.writes==groups[g].writes
+              && total.matched==groups[g].matched,"timeline conservation failure");
+    }
+  }
   require(processed==total_valid && add(groups[0].reads,groups[0].writes)==total_valid,"valid event conservation failure");
   require(add(total_valid,total_invalid)==target,"raw slot conservation failure");
   struct stat after{},path_after{};
@@ -464,12 +525,23 @@ void analyze(const Options& o) {
     << ",\"sha256\":" << quoted(sha.str()) << ",\"digest_scope\":" << quoted(o.max_records?"header_and_analyzed_prefix":"full_file")
     << "},\n\"options\":{\"workers\":" << o.workers << ",\"decode_workers\":" << o.decoders
     << ",\"block_records\":" << o.block_records << ",\"prefetch\":" << o.prefetch << ",\"queue_batches\":" << o.queue_batches
+    << ",\"timeline_bin_cycles\":" << o.timeline_bin_cycles
     << ",\"max_records\":" << (o.max_records?std::to_string(*o.max_records):"null")
     << "},\n\"raw_record_slots\":" << target << ",\"invalid_record_slots\":" << total_invalid
     << ",\"performance\":{\"elapsed_seconds\":" << std::chrono::duration<double>(Clock::now()-start).count()
     << ",\"max_rss_kib\":" << usage.ru_maxrss << ",\"sum_worker_pending_high_water\":" << peak
     << ",\"sum_worker_queue_high_water_batches\":" << queue_peak << "},\n\"groups\":{\"combined\":" << groups[0].json()
-    << ",\"channel_0\":" << groups[1].json() << ",\"channel_1\":" << groups[2].json() << "}\n}\n";
+    << ",\"channel_0\":" << groups[1].json() << ",\"channel_1\":" << groups[2].json() << "},\n\"timeline\":";
+  if (o.timeline_bin_cycles) {
+    json << "{\"schema_version\":1,\"bin_cycles\":" << o.timeline_bin_cycles
+      << ",\"origin_timestamp\":" << (have_time?std::to_string(first_time):"null")
+      << ",\"last_timestamp\":" << (have_time?std::to_string(last_time):"null")
+      << ",\"last_bin\":" << (have_time?std::to_string((last_time-first_time)/o.timeline_bin_cycles):"null")
+      << ",\"attribution\":\"matched_read_request\",\"storage\":\"sparse_event_bins\",\"empty_bins_are_zero\":true"
+      << ",\"csv\":\"execution_timeline.csv\"}";
+    atomic_write(fs::path(o.output)/"execution_timeline.csv",timeline_csv(timelines,o.timeline_bin_cycles));
+  } else json << "null";
+  json << "\n}\n";
   atomic_write(fs::path(o.output)/"summary.json",json.str());
   atomic_write(fs::path(o.output)/"summary.csv",summary_csv(groups));
   atomic_write(fs::path(o.output)/"time_histogram.csv",hist_csv(groups,true));

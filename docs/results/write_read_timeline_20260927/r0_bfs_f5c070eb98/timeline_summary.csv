@@ -1,0 +1,4 @@
+trace_id,label,group,bin_seconds,observed_span_seconds,total_windows,windows_with_pairs,matched_pairs,reads,writes,peak_pairs_per_window,first_peak_window_start_seconds,collector_dropped_records
+r0_bfs_f5c070eb98,Original / BFS,combined,0.1,12.336183495,124,122,209574211,2152101222,314036186,25610859,4.2,0
+r0_bfs_f5c070eb98,Original / BFS,channel_0,0.1,12.336183495,124,121,105193476,1074358336,157469413,12778742,4.2,0
+r0_bfs_f5c070eb98,Original / BFS,channel_1,0.1,12.336183495,124,122,104380735,1077742886,156566773,12832117,4.2,0

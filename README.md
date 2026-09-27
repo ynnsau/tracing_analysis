@@ -10,11 +10,23 @@ inputs remain excluded; one duplicate BC copy is counted only once. Publication
 therefore has complete eligible-trace coverage but partial discovered-input
 coverage. No jobs are needed to regenerate the plots from the saved summaries.
 
+The fresh **0.1-second execution-timeline run is also complete**: Slurm array
+`186369` successfully re-analyzed all ten eligible distinct traces. Its timeline
+counts conserve all original statistics, and every raw-file digest and matching/
+distance result agrees with the earlier publication. The low-effort monitor
+confirmed completion; plotting then ran locally.
+
 ## Results at a glance
 
 [Plots, per-trace tables, and coverage](docs/results/write_read_20260927/README.md) ·
 [Analysis and interpretation](docs/write_read_findings_20260927.md) ·
-[All trace/channel statistics CSV](docs/results/write_read_20260927/summary.csv)
+[All trace/channel statistics CSV](docs/results/write_read_20260927/summary.csv) ·
+[Execution timelines (0.1 s)](docs/results/write_read_timeline_20260927/README.md)
+
+The [timeline overview](docs/results/write_read_timeline_20260927/execution_timeline_overview.png)
+shows when matched reads occur during each trace, not their write-to-read gaps.
+Each trace also has a combined/channel-0/channel-1 PNG and exact per-window
+CSV counts. There are **11 new PNGs**; previous plots remain unchanged.
 
 Across **22,337,500,928 valid accesses**, the analyzer observed **2,336,407,811
 writes** and **1,590,242,325 matched write→first-read pairs**:
@@ -143,6 +155,54 @@ precision loss. Percentile bounds are histogram intervals, not exact percentile
 values. Undefined numeric CSV cells are blank; JSON values are `null`.
 Histogram CSV fractions use matched pairs in their own group as the denominator.
 
+### Execution timelines (0.1-second windows)
+
+New `workflow.py prepare` runs enable `--timeline-bin-cycles 40000000` by
+default: 0.1 seconds at the trace's 400-MHz clock. The standalone analyzer can
+enable the same option; its default of zero retains histogram-only behavior.
+This requires a **fresh analysis of the raw traces**, not failed-task retry or
+rebinning the older saved histograms. No new capture, RTRACE conversion, or
+expanded text trace is needed.
+
+For every matched pair, increment the window containing the **read request**:
+`(read_timestamp - first_valid_timestamp) / timeline_bin_cycles`, using integer
+division. All workers and both channels use that same per-trace origin, even
+when decoder blocks complete out of order. The pending-write map survives window
+boundaries; the latest-write/first-read matching policy is unchanged.
+
+`execution_timeline.csv` stores combined/channel-0/channel-1 counts of matched
+pairs, reads, and writes, with exact half-open cycle offsets. `summary.json`
+records the origin, last valid timestamp, width, and attribution. The CSV stores
+only bins with observed events; absent bins are explicitly zero, so long idle
+gaps do not allocate large dense arrays. Plots restore zero intervals and mark
+the unobserved tail of the last window. Empty traces have null timestamp bounds.
+
+Each timeline must sum to the original read/write/matched counters, and channels
+must sum to the combined result in every bin. Batch completion/retry validation
+requires the timeline artifact when the manifest requests it. Original outputs
+and plots remain intact. Parsing still uses parallel decoder/analysis workers
+and one Slurm array task per distinct trace; plotting runs locally from CSVs.
+
+Counts measure **observed matched-read requests per window**, not response
+completions or service latency. They depend on traffic intensity; per-window
+read/write totals provide context. Collector drops cannot be localized to
+windows from the header alone. Different workloads are not phase-aligned by
+making their first recorded accesses time zero, so timelines are not pooled.
+
+After the new run finishes, publish the timelines **locally**, without Slurm:
+
+```sh
+python3 scripts/plot_execution_timeline.py \
+  --run-dir out/write_read_timeline_20260927_v1 \
+  --baseline-publication docs/results/write_read_20260927 \
+  --output docs/results/write_read_timeline_20260927
+```
+
+The optional baseline comparison requires identical input SHA-256 digests and
+all original matching/distance statistics. Publication includes one three-panel
+PNG per trace, an overview, portable CSV/JSON snapshots, and provenance. It
+refuses incomplete tasks, missing/corrupt timelines, and existing output paths.
+
 `manifest.json` is an immutable launch inventory, not a live results database;
 per-task status files and summaries supply final status and full-file digests.
 Each successful analysis verifies source identity again at completion. A task
@@ -195,6 +255,10 @@ as a passing sanitizer run.
 Additional workflow regressions cover cross-node device/inode differences,
 same-node identity changes, timestamp/header changes, failed-only retry,
 preservation of successful results, and rejection of incomplete/active inputs.
+The execution-timeline extension passes all four CTest suites. Added regressions
+cover exact window boundaries, common origins across workers/channels, matches
+across windows, sparse U64-scale gaps, empty traces, timeline-required retries,
+CSV conservation/corruption checks, baseline agreement, and PNG publication.
 
 ### Implementation and memory bounds
 

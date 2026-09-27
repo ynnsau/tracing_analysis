@@ -1,0 +1,4 @@
+trace_id,label,group,bin_seconds,observed_span_seconds,total_windows,windows_with_pairs,matched_pairs,reads,writes,peak_pairs_per_window,first_peak_window_start_seconds,collector_dropped_records
+r0_pr_b8e5f78041,Original / PR,combined,0.1,38.5196421275,386,386,252741568,4364549670,333070810,11981019,4.2,583273912
+r0_pr_b8e5f78041,Original / PR,channel_0,0.1,38.5196421275,386,386,126466489,2182597285,166641667,5990869,4.2,583273912
+r0_pr_b8e5f78041,Original / PR,channel_1,0.1,38.5196421275,386,386,126275079,2181952385,166429143,5990150,4.2,583273912

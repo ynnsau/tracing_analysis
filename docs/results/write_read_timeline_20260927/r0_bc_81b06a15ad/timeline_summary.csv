@@ -1,0 +1,4 @@
+trace_id,label,group,bin_seconds,observed_span_seconds,total_windows,windows_with_pairs,matched_pairs,reads,writes,peak_pairs_per_window,first_peak_window_start_seconds,collector_dropped_records
+r0_bc_81b06a15ad,Original / BC,combined,0.1,20.4529524825,205,203,641287948,3063623488,814599808,8842717,14.8,1040
+r0_bc_81b06a15ad,Original / BC,channel_0,0.1,20.4529524825,205,203,320536644,1529015379,407198649,4413383,14.8,1040
+r0_bc_81b06a15ad,Original / BC,channel_1,0.1,20.4529524825,205,203,320751304,1534608109,407401159,4429334,14.8,1040

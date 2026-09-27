@@ -56,6 +56,7 @@ class WorkflowTests(unittest.TestCase):
     def test_inventory_snapshot_tasks_and_fake_submit(self):
         m = self.prepare()
         self.assertEqual(m['task_count'], 2)
+        self.assertEqual(m['options']['timeline_bin_cycles'], 40000000)
         self.assertEqual(m['coverage'], 'partial')
         aliases = [e for e in m['inputs'] if e['status'] == 'duplicate_alias']
         self.assertEqual(len(aliases), 2)
@@ -68,6 +69,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(len(statuses), 2)
         for status in statuses:
             self.assertEqual(json.loads(status.read_text())['status'], 'analyzed')
+        for folder in (self.run/'results').iterdir():
+            self.assertTrue((folder/'execution_timeline.csv').is_file())
+            self.assertEqual(json.loads((folder/'summary.json').read_text())['timeline']['bin_cycles'], 40000000)
         before = {p: p.read_bytes() for p in statuses}
         self.call('task', '--run-dir', self.run, '--index', 0, success=False)
         self.assertEqual(before, {p: p.read_bytes() for p in statuses})
@@ -167,6 +171,15 @@ class WorkflowTests(unittest.TestCase):
         # Remove a temporary fixture marker, not a real project result.
         (self.run / 'results' / entry['trace_id'] / 'COMPLETE').unlink()
         self.call('retry', '--from-run', self.run, '--run-dir', self.root / 'incomplete',
+                  '--binary', BINARY, success=False)
+
+    def test_retry_refuses_success_missing_required_timeline(self):
+        m = self.prepare()
+        self.call('task', '--run-dir', self.run, '--index', 0)
+        self.call('step-failed', '--run-dir', self.run, '--index', 1, '--exit-code', 1)
+        entry = next(e for e in m['inputs'] if e.get('task_index') == 0)
+        (self.run/'results'/entry['trace_id']/'execution_timeline.csv').unlink()
+        self.call('retry', '--from-run', self.run, '--run-dir', self.root/'missing_timeline',
                   '--binary', BINARY, success=False)
 
     def test_decreasing_timestamps_are_failed_task(self):

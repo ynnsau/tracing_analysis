@@ -1,0 +1,4 @@
+trace_id,label,group,bin_seconds,observed_span_seconds,total_windows,windows_with_pairs,matched_pairs,reads,writes,peak_pairs_per_window,first_peak_window_start_seconds,collector_dropped_records
+r0_xs_20t_300000p_3868b65f34,Original / XS 20t / 300000p,combined,0.1,4.166628045,42,39,14939301,595900570,52746374,1692933,1.8,0
+r0_xs_20t_300000p_3868b65f34,Original / XS 20t / 300000p,channel_0,0.1,4.166628045,42,39,7481844,297299879,26372885,846002,1.8,0
+r0_xs_20t_300000p_3868b65f34,Original / XS 20t / 300000p,channel_1,0.1,4.166628045,42,39,7457457,298600691,26373489,846931,1.8,0

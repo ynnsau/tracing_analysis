@@ -17,6 +17,7 @@ import struct
 import subprocess
 import sys
 import time
+from timeline_data import validate_timeline
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ROOTS = [Path('/research/yans3/gitdoc/remap_tracing'), Path('/research/yans3/trace')]
@@ -217,7 +218,8 @@ def prepare(args):
                         coverage='partial' if any(e['status'] == 'invalid_input' for e in entries) else 'pending',
                         options=dict(workers=args.workers, decode_workers=args.decode_workers,
                                      block_records=args.block_records, prefetch=args.prefetch,
-                                     queue_batches=args.queue_batches, progress_seconds=args.progress_seconds),
+                                     queue_batches=args.queue_batches, progress_seconds=args.progress_seconds,
+                                     timeline_bin_cycles=args.timeline_bin_cycles),
                         resources=dict(cpus_per_task=args.cpus_per_task, memory=args.memory,
                                        max_parallel=args.max_parallel or len(eligible)),
                         input_validation_policy='node_aware_metadata_header_and_local_stability',
@@ -230,7 +232,7 @@ def prepare(args):
         raise
 
 
-def complete_result(path, entry, expected_sha256):
+def complete_result(path, entry, expected_sha256, timeline_bin_cycles=0):
     required = ['COMPLETE', 'summary.json', 'summary.csv', 'time_histogram.csv',
                 'intervening_operations_histogram.csv']
     if not all((path / name).is_file() for name in required):
@@ -253,6 +255,8 @@ def complete_result(path, entry, expected_sha256):
     if (summary['groups']['combined']['valid_accesses'] + summary['invalid_record_slots']
             != summary['raw_record_slots']):
         raise ValueError(f'cannot reuse result with invalid record counts: {path}')
+    if timeline_bin_cycles:
+        validate_timeline(path, summary, timeline_bin_cycles)
 
 
 def retry(args):
@@ -285,7 +289,7 @@ def retry(args):
                     raise ValueError(f'refusing retry of nonterminal/missing task: {e["trace_id"]}')
                 result = source / 'results' / e['trace_id']
                 digest = status.get('sha256')
-            complete_result(result, e, digest)
+            complete_result(result, e, digest, parent['options'].get('timeline_bin_cycles', 0))
             e.update(status='reused_result', result=str(result), sha256=digest,
                      identity=local_identity, reused_from_run=str(source))
             reused += 1
@@ -377,6 +381,8 @@ def task(args):
         summary = json.loads((output / 'summary.json').read_text())
         if not (output / 'COMPLETE').exists() or not summary['full_trace']:
             raise RuntimeError('analyzer did not publish a full-trace completion marker')
+        if manifest['options'].get('timeline_bin_cycles', 0):
+            validate_timeline(output, summary, manifest['options']['timeline_bin_cycles'])
         if entry.get('sha256') and entry['sha256'] != summary['input']['sha256']:
             raise RuntimeError('full-file digest differs from preparation')
         if identity(Path(entry['path'])) != local_identity:
@@ -423,6 +429,8 @@ def parser():
     prep.add_argument('--prefetch', type=positive, default=8)
     prep.add_argument('--queue-batches', type=positive, default=4)
     prep.add_argument('--progress-seconds', type=positive, default=5)
+    prep.add_argument('--timeline-bin-cycles', type=positive, default=40000000,
+                      help='execution timeline window; default 0.1 s at 400 MHz')
     prep.add_argument('--cpus-per-task', type=positive, default=24)
     prep.add_argument('--memory', default='64G')
     prep.add_argument('--max-parallel', type=positive)

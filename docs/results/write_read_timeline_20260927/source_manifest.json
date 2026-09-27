@@ -1,0 +1,373 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-27T22:44:15.411847+00:00",
+  "run_dir": "/research/yans3/gitdoc/tracing_analysis/out/write_read_timeline_20260927_v1",
+  "roots": [
+    "/research/yans3/gitdoc/remap_tracing",
+    "/research/yans3/trace"
+  ],
+  "inputs": [
+    {
+      "path": "/research/yans3/gitdoc/remap_tracing/bc.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 872796311,
+        "size_bytes": 62051572992,
+        "mtime_ns": 1787418692616345861,
+        "ctime_ns": 1787430817657606390
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 64424509440,
+        "written_records": 3878223310,
+        "dropped_records": 1040
+      },
+      "trace_id": "r0_bc_81b06a15ad",
+      "discovered_path": "/research/yans3/gitdoc/remap_tracing/bc.bin",
+      "dataset_root": "/research/yans3/gitdoc/remap_tracing",
+      "dataset_relative_path": "bc.bin",
+      "sha256": "31088e0066d53ece7978d85168b1e40e09238a2e31ce2578b27a1810bd7d86de",
+      "task_index": 0
+    },
+    {
+      "path": "/research/yans3/gitdoc/remap_tracing/bfs.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 872796309,
+        "size_bytes": 39458198560,
+        "mtime_ns": 1787374945909344424,
+        "ctime_ns": 1787430817657606390
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 64424509440,
+        "written_records": 2466137408,
+        "dropped_records": 0
+      },
+      "trace_id": "r0_bfs_f5c070eb98",
+      "discovered_path": "/research/yans3/gitdoc/remap_tracing/bfs.bin",
+      "dataset_root": "/research/yans3/gitdoc/remap_tracing",
+      "dataset_relative_path": "bfs.bin",
+      "task_index": 1
+    },
+    {
+      "path": "/research/yans3/gitdoc/remap_tracing/cc.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 872646233,
+        "size_bytes": 38945191936,
+        "mtime_ns": 1787430361201741387,
+        "ctime_ns": 1787430817657606390
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 53687091200,
+        "written_records": 2434074494,
+        "dropped_records": 9345
+      },
+      "trace_id": "r0_cc_3cd2baf7ac",
+      "discovered_path": "/research/yans3/gitdoc/remap_tracing/cc.bin",
+      "dataset_root": "/research/yans3/gitdoc/remap_tracing",
+      "dataset_relative_path": "cc.bin",
+      "task_index": 2
+    },
+    {
+      "path": "/research/yans3/gitdoc/remap_tracing/pr.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 873106368,
+        "size_bytes": 75161927712,
+        "mtime_ns": 1787286522856691214,
+        "ctime_ns": 1787430817657606390
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 75161927680,
+        "written_records": 4697620480,
+        "dropped_records": 583273912
+      },
+      "trace_id": "r0_pr_b8e5f78041",
+      "discovered_path": "/research/yans3/gitdoc/remap_tracing/pr.bin",
+      "dataset_root": "/research/yans3/gitdoc/remap_tracing",
+      "dataset_relative_path": "pr.bin",
+      "task_index": 3
+    },
+    {
+      "path": "/research/yans3/gitdoc/remap_tracing/xs_20t.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 873105349,
+        "size_bytes": 75161927712,
+        "mtime_ns": 1787284974000459743,
+        "ctime_ns": 1787430817657606390
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 75161927680,
+        "written_records": 4697620480,
+        "dropped_records": 742705516
+      },
+      "trace_id": "r0_xs_20t_1fed27b3cc",
+      "discovered_path": "/research/yans3/gitdoc/remap_tracing/xs_20t.bin",
+      "dataset_root": "/research/yans3/gitdoc/remap_tracing",
+      "dataset_relative_path": "xs_20t.bin",
+      "task_index": 4
+    },
+    {
+      "path": "/research/yans3/gitdoc/remap_tracing/xs_20t_300000p.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 873106369,
+        "size_bytes": 10378351136,
+        "mtime_ns": 1787277526959320459,
+        "ctime_ns": 1787430817657606390
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 75161927680,
+        "written_records": 648646944,
+        "dropped_records": 0
+      },
+      "trace_id": "r0_xs_20t_300000p_3868b65f34",
+      "discovered_path": "/research/yans3/gitdoc/remap_tracing/xs_20t_300000p.bin",
+      "dataset_root": "/research/yans3/gitdoc/remap_tracing",
+      "dataset_relative_path": "xs_20t_300000p.bin",
+      "task_index": 5
+    },
+    {
+      "path": "/research/yans3/trace/bc.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 18792610036,
+        "size_bytes": 62051572992,
+        "mtime_ns": 1787255758003959971,
+        "ctime_ns": 1787255758003959971
+      },
+      "status": "duplicate_alias",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 64424509440,
+        "written_records": 3878223310,
+        "dropped_records": 1040
+      },
+      "trace_id": "r1_bc_420f70ad20",
+      "discovered_path": "/research/yans3/trace/bc.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "bc.bin",
+      "sha256": "31088e0066d53ece7978d85168b1e40e09238a2e31ce2578b27a1810bd7d86de",
+      "alias_of": "r0_bc_81b06a15ad",
+      "duplicate_proof": "full_sha256"
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/bc_8g_noTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181007,
+        "size_bytes": 15393095680,
+        "mtime_ns": 1788729790000000000,
+        "ctime_ns": 1788887394722431219
+      },
+      "status": "invalid_input",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 2684354560,
+        "dropped_records": 2101210257
+      },
+      "error": "header implies 42949672992 bytes; actual 15393095680",
+      "trace_id": "r1_trace_09_07_bc_8g_noTHP_5f7ed7edbf",
+      "discovered_path": "/research/yans3/trace/trace_09_07/bc_8g_noTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/bc_8g_noTHP.bin"
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/bc_8g_withTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181012,
+        "size_bytes": 15103688704,
+        "mtime_ns": 1788741204000000000,
+        "ctime_ns": 1788887563107176113
+      },
+      "status": "invalid_input",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 2684354564,
+        "dropped_records": 1848830903
+      },
+      "error": "header implies 42949673056 bytes; actual 15103688704",
+      "trace_id": "r1_trace_09_07_bc_8g_withTHP_1a0ede8f94",
+      "discovered_path": "/research/yans3/trace/trace_09_07/bc_8g_withTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/bc_8g_withTHP.bin"
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/bfs_8g_noTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181010,
+        "size_bytes": 13687262240,
+        "mtime_ns": 1788734053000000000,
+        "ctime_ns": 1788887492860116902
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 855453888,
+        "dropped_records": 0
+      },
+      "trace_id": "r1_trace_09_07_bfs_8g_noTHP_1d3fc83cc2",
+      "discovered_path": "/research/yans3/trace/trace_09_07/bfs_8g_noTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/bfs_8g_noTHP.bin",
+      "task_index": 6
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/bfs_8g_withTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181011,
+        "size_bytes": 12256433184,
+        "mtime_ns": 1788735081000000000,
+        "ctime_ns": 1788887522923714273
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 766027072,
+        "dropped_records": 0
+      },
+      "trace_id": "r1_trace_09_07_bfs_8g_withTHP_467813de1b",
+      "discovered_path": "/research/yans3/trace/trace_09_07/bfs_8g_withTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/bfs_8g_withTHP.bin",
+      "task_index": 7
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/cc_8g_noTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181009,
+        "size_bytes": 17047481376,
+        "mtime_ns": 1788732434000000000,
+        "ctime_ns": 1788887457566589574
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 1065467584,
+        "dropped_records": 0
+      },
+      "trace_id": "r1_trace_09_07_cc_8g_noTHP_25fca2b541",
+      "discovered_path": "/research/yans3/trace/trace_09_07/cc_8g_noTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/cc_8g_noTHP.bin",
+      "task_index": 8
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/cc_8g_withTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181008,
+        "size_bytes": 13251669024,
+        "mtime_ns": 1788736409000000000,
+        "ctime_ns": 1788887418121117850
+      },
+      "status": "eligible",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 828229312,
+        "dropped_records": 0
+      },
+      "trace_id": "r1_trace_09_07_cc_8g_withTHP_484755becf",
+      "discovered_path": "/research/yans3/trace/trace_09_07/cc_8g_withTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/cc_8g_withTHP.bin",
+      "task_index": 9
+    },
+    {
+      "path": "/research/yans3/trace/trace_09_07/pr_8g_withTHP.bin",
+      "identity": {
+        "device": 2304,
+        "inode": 35368181006,
+        "size_bytes": 15036579840,
+        "mtime_ns": 1788744190000000000,
+        "ctime_ns": 1788887366323811478
+      },
+      "status": "invalid_input",
+      "header": {
+        "magic": 1414676803,
+        "version": 1,
+        "buffer_size": 42949672960,
+        "written_records": 2684354560,
+        "dropped_records": 205281471
+      },
+      "error": "header implies 42949672992 bytes; actual 15036579840",
+      "trace_id": "r1_trace_09_07_pr_8g_withTHP_1a6cd094d2",
+      "discovered_path": "/research/yans3/trace/trace_09_07/pr_8g_withTHP.bin",
+      "dataset_root": "/research/yans3/trace",
+      "dataset_relative_path": "trace_09_07/pr_8g_withTHP.bin"
+    }
+  ],
+  "task_count": 10,
+  "coverage": "partial",
+  "options": {
+    "workers": 16,
+    "decode_workers": 4,
+    "block_records": 262144,
+    "prefetch": 8,
+    "queue_batches": 4,
+    "progress_seconds": 5,
+    "timeline_bin_cycles": 40000000
+  },
+  "resources": {
+    "cpus_per_task": 24,
+    "memory": "64G",
+    "max_parallel": 10
+  },
+  "input_validation_policy": "node_aware_metadata_header_and_local_stability",
+  "provenance": {
+    "git_head": "4a6db13c8aae0d1edcdc1cd1d2fa76ce75a28c93",
+    "git_status": "M README.md\n M scripts/workflow.py\n M src/write_read_analyzer.cpp\n M tests/test_analysis.py\n M tests/test_workflow.py\n?? scripts/timeline_data.py",
+    "binary_sha256": "395ce9cc69d2074e5a93b5438962d7faa717f54dd777f802995d3df62c0f6034",
+    "source_sha256": {
+      ".gitignore": "64ab943757398882cec1768dbac59014c00a0af26b125db33e053a9808d4a34a",
+      "CMakeLists.txt": "ac12e959d171d2f165f7e34ed0441da4ec32ec00c72877b245bdf254299699ba",
+      "README.md": "506c425cdbf52942d13adea5e5dd95b276cb97b34cd87f32a405def4e944f9a8",
+      "scripts/analyze_array.sbatch": "af576bd94ed5e05bbf8f564b07cb1998d3a08fccfbf4920f1f60f5b92e7091c0",
+      "scripts/plot_results.py": "5538473d6e91bc41dad294123d5725550300372a5b7d81b883b4f40aefaf9eff",
+      "scripts/timeline_data.py": "bdcb1d02bbfe4e21050dbec2446628931c6b12d0b418bec47c45569b8da70e39",
+      "scripts/workflow.py": "3d901ffdb57cea76a892b117879a491d4950f913b836814477dd22456bc1624d",
+      "src/write_read_analyzer.cpp": "d239533289d645989cd5a407e2c782677ac6940ff66ce5b2ef2f8bf1e6c556bf",
+      "tests/test_analysis.py": "423bee0a26b9de04c6e9fdb27becd9a199aab3e62fda2ae86654ea137c3a456b",
+      "tests/test_plot_results.py": "336c45da2af3823f6c6ebf6337df55bd622fa05562f4c3c2086a827f417cc876",
+      "tests/test_workflow.py": "6a0fe5bb74307db0526c987cde9888ed6226333c489b1c9a4bf710277a20cda9"
+    },
+    "host": "janux-spr5.csl.illinois.edu",
+    "source_snapshot": "snapshot/"
+  }
+}

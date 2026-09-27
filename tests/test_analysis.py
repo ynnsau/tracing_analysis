@@ -89,6 +89,29 @@ def reference(events):
     return result
 
 
+def reference_timeline(events, width):
+    valid = [(low, t) for low, t in events if low >> 63]
+    data = {g: {} for g in ('combined', 'channel_0', 'channel_1')}
+    pending = set()
+    first = valid[0][1] if valid else None
+    last = valid[-1][1] if valid else None
+    for low, t in valid:
+        line = (low & ADDRESS_MASK) >> 6
+        b = (t-first)//width
+        for group in data:
+            data[group].setdefault(b, dict(reads=0, writes=0, matched_pairs=0))
+        write = bool(low >> 62 & 1)
+        match = not write and line in pending
+        for group in ('combined', 'channel_'+str(line & 1)):
+            data[group][b]['writes' if write else 'reads'] += 1
+            data[group][b]['matched_pairs'] += int(match)
+        if write:
+            pending.add(line)
+        elif match:
+            pending.remove(line)
+    return first, last, data
+
+
 class AnalysisTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -130,6 +153,27 @@ class AnalysisTests(unittest.TestCase):
         self.assertEqual((output / 'COMPLETE').exists(), not limited)
         self.assertEqual((output / 'SMOKE_COMPLETE').exists(), limited)
         self.assertEqual(summary['full_trace'], not limited)
+        width = int(extra[extra.index('--timeline-bin-cycles')+1]) if '--timeline-bin-cycles' in extra else 0
+        if width:
+            first, last, expected = reference_timeline(analyzed, width)
+            meta = summary['timeline']
+            self.assertEqual(meta['origin_timestamp'], first)
+            self.assertEqual(meta['last_timestamp'], last)
+            self.assertEqual(meta['last_bin'], (last-first)//width if first is not None else None)
+            self.assertEqual(meta['bin_cycles'], width)
+            self.assertEqual(meta['attribution'], 'matched_read_request')
+            actual = {g: {} for g in expected}
+            with (output/'execution_timeline.csv').open() as stream:
+                for row in csv.DictReader(stream):
+                    b = int(row['bin'])
+                    self.assertEqual(int(row['start_offset_cycles']), b*width)
+                    self.assertEqual(int(row['end_offset_cycles_exclusive']), (b+1)*width)
+                    self.assertNotIn(b, actual[row['group']])
+                    actual[row['group']][b] = {k: int(row[k]) for k in ('reads', 'writes', 'matched_pairs')}
+            self.assertEqual(actual, expected)
+        else:
+            self.assertIsNone(summary['timeline'])
+            self.assertFalse((output/'execution_timeline.csv').exists())
         for filename, metric_key in [('time_histogram.csv', 'time_cycles'),
                                      ('intervening_operations_histogram.csv', 'intervening_operations')]:
             with (output / filename).open() as stream:
@@ -176,6 +220,23 @@ class AnalysisTests(unittest.TestCase):
                        [event(0, 0, True)], [event(64, 0, True), event(64, 0)]):
             self.run_case(events)
 
+    def test_timeline_boundaries_origin_cross_window_and_supersession(self):
+        w, t = 40000000, 12345
+        events = [event(0, U64_MAX, valid=False), event(128, t), event(0, t+1, True),
+                  event(64, t+w-1, True), event(0, t+w-1, True), event(0, t+w),
+                  event(64, t+3*w), event(192, t+3*w, True), event(192, t+3*w),
+                  event(256, t+5*w+2, True)]
+        for workers in (1, 2, 16):
+            self.run_case(events, workers=workers, block=1,
+                          extra=('--timeline-bin-cycles', str(w), '--test-delay-first-block-ms', '100'))
+
+    def test_timeline_empty_prefix_and_huge_sparse_span(self):
+        for events in ([], [event(0, 9, valid=False)], [event(0, 7, True)],
+                       [event(0, 0, True), event(0, U64_MAX)]):
+            self.run_case(events, extra=('--timeline-bin-cycles', '1'))
+        self.run_case([event(0, 5, True), event(0, 10)],
+                      extra=('--timeline-bin-cycles', '1', '--max-records', '1'))
+
     def test_histogram_u64_boundaries_and_wide_sum(self):
         distances = sorted(set([0, 1, U64_MAX] + [v for b in range(1, 64) for v in ((1 << b)-1, 1 << b)]))
         events = [event(i*64, 0, True) for i in range(len(distances))]
@@ -197,7 +258,7 @@ class AnalysisTests(unittest.TestCase):
         for workers in (1, 2, 16):
             for block in (17, 1000):
                 self.run_case(events, workers=workers, block=block,
-                              extra=('--test-delay-first-block-ms', '100'))
+                              extra=('--test-delay-first-block-ms', '100', '--timeline-bin-cycles', '13'))
 
     def test_prefix_is_never_a_full_result(self):
         events = [event(0, 0, True), event(0, 1), event(64, 2, True)]

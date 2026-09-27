@@ -20,3 +20,5 @@ add_test(NAME workflow COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_workflow.py $<TARGET_FILE:write_read_analyzer>)
 add_test(NAME plotting COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_plot_results.py)
+add_test(NAME execution_timeline COMMAND ${Python3_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_execution_timeline.py)

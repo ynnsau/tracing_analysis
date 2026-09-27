@@ -1,0 +1,4 @@
+trace_id,label,group,bin_seconds,observed_span_seconds,total_windows,windows_with_pairs,matched_pairs,reads,writes,peak_pairs_per_window,first_peak_window_start_seconds,collector_dropped_records
+r0_cc_3cd2baf7ac,Original / CC,combined,0.1,12.9579503725,130,128,197789959,2060771601,373302863,11441177,5.8,9345
+r0_cc_3cd2baf7ac,Original / CC,channel_0,0.1,12.9579503725,130,128,98823356,1028591054,186649199,5713536,5.8,9345
+r0_cc_3cd2baf7ac,Original / CC,channel_1,0.1,12.9579503725,130,128,98966603,1032180547,186653664,5727641,5.8,9345
